@@ -1,6 +1,6 @@
 {
-  "name": "midjourney",
-  "version": "2.5.0",
+  "name": "midjourney-api-enterprise",
+  "version": "1.0.0",
   "description": "Node.js client for the unofficial MidJourney API.",
   "main": "libs/index.js",
   "types": "libs/index.d.ts",
@@ -21,8 +21,6 @@
     "url": "git+https://github.com/erictik/midjourney-api.git"
   },
   "keywords": [
-    "midjourney-api",
-    "midjourney"
   ],
   "engines": {
     "node": ">=18"
