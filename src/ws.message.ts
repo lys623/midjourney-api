@@ -251,7 +251,7 @@ export class WsMessage {
       message: MJmsg,
     };
     if (!event) {
-      this.log("FilterMessages not found", MJmsg, this.waitMjEvents);
+      this.log("FilterMessages not found.", MJmsg, this.waitMjEvents);
       this.emitImage('notFoundCallback', eventMsg);
       return;
     }
