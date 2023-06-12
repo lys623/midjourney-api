@@ -9,6 +9,8 @@ import {
 import { MidjourneyApi } from "./midjourne.api";
 import { VerifyHuman } from "./verify.human";
 import WebSocket from "isomorphic-ws";
+import { HttpsProxyAgent } from "https-proxy-agent";
+
 export class WsMessage {
   ws: WebSocket;
   MJBotId = "936929561302675456";
@@ -17,9 +19,14 @@ export class WsMessage {
   private waitMjEvents: Map<string, WaitMjEvent> = new Map();
   private reconnectTime: boolean[] = [];
   private heartbeatInterval = 0;
+  agent?: HttpsProxyAgent<string>;
 
   constructor(public config: MJConfig, public MJApi: MidjourneyApi) {
-    this.ws = new WebSocket(this.config.WsBaseUrl);
+    if (this.config.ProxyUrl && this.config.ProxyUrl !== "") {
+      this.agent = new HttpsProxyAgent(this.config.ProxyUrl);
+    }
+    const agent = this.agent;
+    this.ws = new WebSocket(this.config.WsBaseUrl, { agent });
     this.ws.addEventListener("open", this.open.bind(this));
   }
 
@@ -37,7 +44,8 @@ export class WsMessage {
   }
   //try reconnect
   private reconnect() {
-    this.ws = new WebSocket(this.config.WsBaseUrl);
+    const agent = this.agent;
+    this.ws = new WebSocket(this.config.WsBaseUrl, { agent });
     this.ws.addEventListener("open", this.open.bind(this));
   }
   // After opening ws
@@ -80,7 +88,7 @@ export class WsMessage {
   }
   private async messageCreate(message: any) {
     // this.log("messageCreate", message);
-    const { application_id, embeds, id, nonce } = message;
+    const { embeds, id, nonce, components } = message;
     if (nonce) {
       this.log("waiting start image or info or error");
       this.updateMjEventIdByNonce(id, nonce);
@@ -109,9 +117,9 @@ export class WsMessage {
         }
       }
     }
-    //done image
-    if (!nonce && !application_id) {
-      this.log("done image");
+    //finished image
+    if (!nonce && components.length > 0) {
+      this.log("finished image");
       this.done(message);
       return;
     }

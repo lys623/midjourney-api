@@ -10,6 +10,7 @@ export interface MJConfig {
   HuggingFaceToken?: string;
   DiscordBaseUrl: string;
   WsBaseUrl: string;
+  ProxyUrl?: string;
 }
 export interface MJConfigParam {
   SalaiToken: string;
@@ -23,6 +24,7 @@ export interface MJConfigParam {
   SessionId?: string;
   DiscordBaseUrl?: string;
   WsBaseUrl?: string;
+  ProxyUrl?: string;
 }
 
 export const DefaultMJConfig: MJConfig = {
