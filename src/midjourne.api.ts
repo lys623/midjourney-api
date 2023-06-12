@@ -1,12 +1,12 @@
 import { MJConfig } from "./interfaces";
 import { CreateQueue } from "./queue";
 import { nextNonce, sleep } from "./utls";
-// import fetch from "node-fetch";
-const _importDynamic = new Function('modulePath', 'return import(modulePath)');
-const fetch = async function (...args: any) {
-    const {default: fetch} = await _importDynamic('node-fetch');
-    return fetch(...args);
-}
+import {fetch} from "./fetch";
+// const _importDynamic = new Function('modulePath', 'return import(modulePath)');
+// const fetch = async function (...args: any) {
+//     const {default: fetch} = await _importDynamic('node-fetch');
+//     return fetch(...args);
+// }
 import { HttpsProxyAgent } from "https-proxy-agent";
 
 export class MidjourneyApi {
