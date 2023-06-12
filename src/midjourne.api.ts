@@ -32,6 +32,9 @@ export class MidjourneyApi {
           headers: headers,
         }
       );
+      if(response.status!==204){
+        console.log('error response',response)
+      }
       callback && callback(response.status);
       //discord api rate limit
       await sleep(950);
