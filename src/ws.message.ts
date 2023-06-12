@@ -255,13 +255,14 @@ export class WsMessage {
 
   private filterMessages(MJmsg: MJMessage) {
     const event = this.getEventByContent(MJmsg.content);
-    if (!event) {
-      this.log("FilterMessages not found", MJmsg, this.waitMjEvents);
-      return;
-    }
     const eventMsg: WsEventMsg = {
       message: MJmsg,
     };
+    if (!event) {
+      this.log("FilterMessages not found.", MJmsg, this.waitMjEvents);
+      this.emitImage('notFoundCallback', eventMsg);
+      return;
+    }
     this.emitImage(event.nonce, eventMsg);
   }
   private getEventByContent(content: string) {
