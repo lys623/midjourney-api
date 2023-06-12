@@ -1,9 +1,17 @@
 import { MJConfig } from "./interfaces";
 import { CreateQueue } from "./queue";
 import { nextNonce, sleep } from "./utls";
+import fetch from "node-fetch";
+import { HttpsProxyAgent } from "https-proxy-agent";
+
 export class MidjourneyApi {
   private ApiQueue = CreateQueue(1);
-  constructor(public config: MJConfig) {}
+  agent?: HttpsProxyAgent<string>;
+  constructor(public config: MJConfig) {
+    if (this.config.ProxyUrl && this.config.ProxyUrl !== "") {
+      this.agent = new HttpsProxyAgent(this.config.ProxyUrl);
+    }
+  }
   // limit the number of concurrent interactions
   protected async safeIteractions(payload: any) {
     return this.ApiQueue.addTask(
@@ -24,14 +32,19 @@ export class MidjourneyApi {
         "Content-Type": "application/json",
         Authorization: this.config.SalaiToken,
       };
+      const agent = this.agent;
       const response = await fetch(
         `${this.config.DiscordBaseUrl}/api/v9/interactions`,
         {
           method: "POST",
           body: JSON.stringify(payload),
           headers: headers,
+          agent,
         }
       );
+      if(response.status!==204){
+        console.log('error response',response)
+      }
       callback && callback(response.status);
       //discord api rate limit
       await sleep(950);
