@@ -54,10 +54,11 @@ export class WsMessage {
     this.log("open.time", num);
     this.reconnectTime.push(false);
     this.auth();
-    this.ws.addEventListener("message", (event) => {
+    // @ts-ignore
+    this.ws.addEventListener("message", (event:{data:string}) => {
       this.parseMessage(event.data as string);
     });
-    this.ws.addEventListener("error", (event) => {
+    this.ws.addEventListener("error", () => {
       this.reconnectTime[num] = true;
       this.reconnect();
     });
