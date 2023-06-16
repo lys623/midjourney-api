@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/lys623/midjourney-api#readme",
   "devDependencies": {
+    "@types/mime": "^3.0.1",
     "@types/node": "^18.16.0",
     "@types/ws": "^8.5.4",
     "dotenv": "^16.0.3",
@@ -42,9 +43,8 @@
   },
   "dependencies": {
     "@huggingface/inference": "^2.5.0",
-    "https-proxy-agent": "^7.0.0",
     "isomorphic-ws": "^5.0.0",
-    "node-fetch": "^3.3.1",
+    "mime": "^3.0.0",
     "p-queue": "^6.6.2",
     "snowyflake": "^2.0.0",
     "throat": "^6.0.2",
