@@ -4,29 +4,31 @@ import {
   MJMessage,
   LoadingHandler,
   WsEventMsg,
+  MJInfo,
 } from "./interfaces";
 
 import { MidjourneyApi } from "./midjourne.api";
 import { VerifyHuman } from "./verify.human";
 import WebSocket from "isomorphic-ws";
-import { HttpsProxyAgent } from "https-proxy-agent";
+// import { HttpsProxyAgent } from "https-proxy-agent";
 
 export class WsMessage {
   ws: WebSocket;
   MJBotId = "936929561302675456";
+  private closed = false;
   private event: Array<{ event: string; callback: (message: any) => void }> =
     [];
   private waitMjEvents: Map<string, WaitMjEvent> = new Map();
   private reconnectTime: boolean[] = [];
   private heartbeatInterval = 0;
-  agent?: HttpsProxyAgent<string>;
+  // agent?: HttpsProxyAgent<string>;
 
   constructor(public config: MJConfig, public MJApi: MidjourneyApi) {
     if (this.config.ProxyUrl && this.config.ProxyUrl !== "") {
-      this.agent = new HttpsProxyAgent(this.config.ProxyUrl);
+      // this.agent = new HttpsProxyAgent(this.config.ProxyUrl);
     }
-    const agent = this.agent;
-    this.ws = new WebSocket(this.config.WsBaseUrl, { agent });
+    // const agent = this.agent;
+    this.ws = new WebSocket(this.config.WsBaseUrl);
     this.ws.addEventListener("open", this.open.bind(this));
   }
 
@@ -42,10 +44,16 @@ export class WsMessage {
     await this.timeout(1000 * 40);
     this.heartbeat(num);
   }
+  close() {
+    this.closed = true;
+    this.ws.close();
+  }
+
   //try reconnect
   private reconnect() {
-    const agent = this.agent;
-    this.ws = new WebSocket(this.config.WsBaseUrl, { agent });
+    if (this.closed) return;
+    // const agent = this.agent;
+    this.ws = new WebSocket(this.config.WsBaseUrl);
     this.ws.addEventListener("open", this.open.bind(this));
   }
   // After opening ws
@@ -87,47 +95,61 @@ export class WsMessage {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   private async messageCreate(message: any) {
-    // this.log("messageCreate", message);
     const { embeds, id, nonce, components } = message;
+
     if (nonce) {
       this.log("waiting start image or info or error");
       this.updateMjEventIdByNonce(id, nonce);
-      if (embeds && embeds.length > 0) {
-        if (embeds[0].color === 16711680) {
-          //error
-          const error = new Error(embeds[0].description);
-          this.EventError(id, error);
-          return;
-        } else if (embeds[0].color === 16776960) {
-          //warning
-          console.warn(embeds[0].description);
-        }
-        if (embeds[0].title.includes("continue")) {
-          if (embeds[0].description.includes("verify you're human")) {
-            //verify human
-            await this.verifyHuman(message);
+
+      if (embeds?.[0]) {
+        const { color, description, title } = embeds[0];
+        this.log("embeds[0].color", color);
+        switch (color) {
+          case 16711680: //error
+            const error = new Error(description);
+            this.EventError(id, error);
             return;
-          }
-        }
-        if (embeds[0].title.includes("Invalid")) {
-          //error
-          const error = new Error(embeds[0].description);
-          this.EventError(id, error);
-          return;
+
+          case 16776960: //warning
+            console.warn(description);
+            break;
+
+          default:
+            if (
+              title?.includes("continue") &&
+              description?.includes("verify you're human")
+            ) {
+              //verify human
+              await this.verifyHuman(message);
+              return;
+            }
+
+            if (title?.includes("Invalid")) {
+              //error
+              const error = new Error(description);
+              this.EventError(id, error);
+              return;
+            }
         }
       }
     }
-    //finished image
-    if (!nonce && components.length > 0) {
+
+    if (!nonce && components?.length > 0) {
       this.log("finished image");
       this.done(message);
       return;
     }
+
     this.messageUpdate(message);
   }
   private messageUpdate(message: any) {
-    const { content, embeds, id } = message;
+    // this.log("messageUpdate", message);
+    const { content, embeds, interaction, nonce, id } = message;
     if (content === "") {
+      //describe
+      if (interaction.name === "describe" && !nonce) {
+        this.emitDescribe(id, embeds[0].description);
+      }
       if (embeds && embeds.length > 0 && embeds[0].color === 0) {
         this.log(embeds[0].title, embeds[0].description);
         //maybe info
@@ -232,6 +254,11 @@ export class WsMessage {
   }
 
   protected content2progress(content: string) {
+    const spcon = content.split("**");
+    if (spcon.length < 3) {
+      return "";
+    }
+    content = spcon[2];
     const regex = /\(([^)]+)\)/; // matches the value inside the first parenthesis
     const match = content.match(regex);
     let progress = "";
@@ -304,6 +331,11 @@ export class WsMessage {
   private emitImage(type: string, message: WsEventMsg) {
     this.emit(type, message);
   }
+  private emitDescribe(id: string, data: any) {
+    const event = this.getEventById(id);
+    if (!event) return;
+    this.emit(event.nonce, data);
+  }
   on(event: string, callback: (message: any) => void) {
     this.event.push({ event, callback });
   }
@@ -329,6 +361,16 @@ export class WsMessage {
     };
     this.event.push({ event: "info", callback: once });
   }
+  onceDescribe(nonce: string, callback: (data: any) => void) {
+    const once = (message: any) => {
+      this.remove(nonce, once);
+      this.removeWaitMjEvent(nonce);
+      callback(message);
+    };
+    this.waitMjEvents.set(nonce, { nonce });
+    this.event.push({ event: nonce, callback: once });
+  }
+
   removeInfo(callback: (message: any) => void) {
     this.remove("info", callback);
   }
@@ -347,6 +389,7 @@ export class WsMessage {
     this.waitMjEvents.set(nonce, { nonce });
     this.event.push({ event: nonce, callback: once });
   }
+
   async waitImageMessage(nonce: string, loading?: LoadingHandler) {
     return new Promise<MJMessage | null>((resolve, reject) => {
       this.onceImage(nonce, ({ message, error }) => {
@@ -363,15 +406,24 @@ export class WsMessage {
     });
   }
 
+  async waitDescribe(nonce: string) {
+    return new Promise<string[] | null>((resolve) => {
+      this.onceDescribe(nonce, (message) => {
+        const data = message.split("\n\n");
+        resolve(data);
+      });
+    });
+  }
+
   async waitInfo() {
-    return new Promise<any | null>((resolve, reject) => {
+    return new Promise<MJInfo | null>((resolve, reject) => {
       this.onceInfo((message) => {
         resolve(this.msg2Info(message));
       });
     });
   }
   msg2Info(msg: string) {
-    const jsonResult = {
+    let jsonResult: MJInfo = {
       subscription: "",
       jobMode: "",
       visibilityMode: "",
@@ -381,7 +433,7 @@ export class WsMessage {
       queuedJobsFast: "",
       queuedJobsRelax: "",
       runningJobs: "",
-    };
+    }; // Initialize jsonResult with empty object
     msg.split("\n").forEach(function (line) {
       const colonIndex = line.indexOf(":");
       if (colonIndex > -1) {

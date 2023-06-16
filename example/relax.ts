@@ -2,9 +2,9 @@ import "dotenv/config";
 import { Midjourney } from "../src";
 /**
  *
- * a simple example of using the info api
+ * a simple example of using the relax api
  * ```
- * npx tsx example/imagine-info.ts
+ * npx tsx example/relax.ts
  * ```
  */
 async function main() {
@@ -16,8 +16,10 @@ async function main() {
     Ws: true,
   });
   await client.init();
+  await client.Relax();
   const msg = await client.Info();
   console.log({ msg });
+  client.Close();
 }
 main()
   .then(() => {

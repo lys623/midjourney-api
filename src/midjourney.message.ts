@@ -7,13 +7,10 @@ import {
 } from "./interfaces";
 import { CreateQueue } from "./queue";
 import { sleep } from "./utls";
-import fetch from "node-fetch";
-import { HttpsProxyAgent } from "https-proxy-agent";
 
 export class MidjourneyMessage {
   private magApiQueue = CreateQueue(1);
   public config: MJConfig;
-  agent?: HttpsProxyAgent<string>;
   constructor(defaults: MJConfigParam) {
     const { SalaiToken } = defaults;
     if (!SalaiToken) {
@@ -24,41 +21,30 @@ export class MidjourneyMessage {
       ...defaults,
     };
     if (this.config.ProxyUrl && this.config.ProxyUrl !== "") {
-      this.agent = new HttpsProxyAgent(this.config.ProxyUrl);
     }
   }
   protected log(...args: any[]) {
     this.config.Debug && console.log(...args, new Date().toISOString());
   }
   async FilterMessages(
+    timestamp: number,
     prompt: string,
     loading?: LoadingHandler,
     options?: string,
     index?: number
   ) {
-    // remove urls
-    const regex = /(<)?(https?:\/\/[^\s]*)(>)?/gi;
-    prompt = prompt.replace(regex, "");
-    // remove multiple spaces
-    prompt = prompt.trim();
-
+    const seed = prompt.match(/\[(.*?)\]/)?.[1];
+    this.log(`seed:`, seed);
     const data = await this.safeRetrieveMessages(this.config.Limit);
     for (let i = 0; i < data.length; i++) {
       const item = data[i];
       if (
         item.author.id === "936929561302675456" &&
-        item.content.includes(`${prompt}`)
+        item.content.includes(`${seed}`)
       ) {
-        this.log(JSON.stringify(item));
-        // Upscaled or Variation
-        if (
-          options &&
-          !(
-            item.content.includes(options) ||
-            (options === "Upscaled" && item.content.includes(`Image #${index}`))
-          )
-        ) {
-          this.log("no options");
+        const itemTimestamp = new Date(item.timestamp).getTime();
+        if (itemTimestamp < timestamp) {
+          this.log("old message");
           continue;
         }
         if (item.attachments.length === 0) {
@@ -72,14 +58,7 @@ export class MidjourneyMessage {
           item.components.length === 0
         ) {
           this.log(`content`, item.content);
-          const regex = /\(([^)]+)\)/; // matches the value inside the first parenthesis
-          const match = item.content.match(regex);
-          let progress = "wait";
-          if (match) {
-            progress = match[1];
-          } else {
-            this.log("No match found");
-          }
+          const progress = this.content2progress(item.content);
           loading?.(imageUrl, progress);
           break;
         }
@@ -97,12 +76,31 @@ export class MidjourneyMessage {
     }
     return null;
   }
+  protected content2progress(content: string) {
+    const spcon = content.split("**");
+    if (spcon.length < 3) {
+      return "";
+    }
+    content = spcon[2];
+    const regex = /\(([^)]+)\)/; // matches the value inside the first parenthesis
+    const match = content.match(regex);
+    let progress = "";
+    if (match) {
+      progress = match[1];
+    }
+    return progress;
+  }
   UriToHash(uri: string) {
     return uri.split("_").pop()?.split(".")[0] ?? "";
   }
-  async WaitMessage(prompt: string, loading?: LoadingHandler) {
+  async WaitMessage(
+    prompt: string,
+    loading?: LoadingHandler,
+    timestamp?: number
+  ) {
+    timestamp = timestamp ?? Date.now();
     for (let i = 0; i < this.config.MaxWait; i++) {
-      const msg = await this.FilterMessages(prompt, loading);
+      const msg = await this.FilterMessages(timestamp, prompt, loading);
       if (msg !== null) {
         return msg;
       }
@@ -117,8 +115,15 @@ export class MidjourneyMessage {
     options: string,
     loading?: LoadingHandler
   ) {
+    var timestamp = Date.now();
+
     for (let i = 0; i < this.config.MaxWait; i++) {
-      const msg = await this.FilterMessages(content, loading, options);
+      const msg = await this.FilterMessages(
+        timestamp,
+        content,
+        loading,
+        options
+      );
       if (msg !== null) {
         return msg;
       }
@@ -132,8 +137,10 @@ export class MidjourneyMessage {
     index: number,
     loading?: LoadingHandler
   ) {
+    var timestamp = Date.now();
     for (let i = 0; i < this.config.MaxWait; i++) {
       const msg = await this.FilterMessages(
+        timestamp,
         content,
         loading,
         "Upscaled",
@@ -157,12 +164,10 @@ export class MidjourneyMessage {
       "Content-Type": "application/json",
       Authorization: this.config.SalaiToken,
     };
-    const agent = this.agent;
     const response = await fetch(
       `${this.config.DiscordBaseUrl}/api/v10/channels/${this.config.ChannelId}/messages?limit=${limit}`,
       {
         headers,
-        agent,
       }
     );
     if (!response.ok) {
