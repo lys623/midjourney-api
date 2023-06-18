@@ -150,7 +150,24 @@ export class MidjourneyApi {
     };
     return this.safeIteractions(payload);
   }
-
+  async ResetApi(nonce: string){
+    const guild_id = this.config.ServerId;
+    const payload={
+      "type": 3,
+      "nonce": nonce,
+      "guild_id": guild_id,
+      "channel_id": this.config.ChannelId,
+      "session_id": this.config.SessionId,
+      "message_flags": 64,
+      "message_id": "1114944788060459120",
+      "application_id": "936929561302675456",
+      "data": {
+          "component_type": 2,
+          "custom_id": "MJ::Settings::ResetSettings"
+      }
+    }
+   return this.safeIteractions(payload);
+  }
   async ClickBtnApi(messageId: string, customId: string, nonce?: string) {
     const guild_id = this.config.ServerId;
     const payload = {

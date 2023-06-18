@@ -71,6 +71,14 @@ export class Midjourney extends MidjourneyMessage {
     }
     return null;
   }
+  async Reset() {
+    const nonce = nextNonce();
+    const httpStatus = await this.MJApi.ResetApi(nonce);
+    if (httpStatus !== 204) {
+      throw new Error(`ResetApi failed with status ${httpStatus}`);
+    }
+    return null;
+  }
 
   async Fast() {
     const nonce = nextNonce();
