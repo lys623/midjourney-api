@@ -48,7 +48,10 @@ export class Command {
           //   `got ${name} application_commands`,
           //   application_commands[0]
           // );
-          return filterArr[0];
+          return filterArr[0]
+      }
+      if(application_commands[0]){
+        return application_commands[0]
       }
     }
 
