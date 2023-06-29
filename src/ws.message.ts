@@ -6,6 +6,7 @@ import {
   WsEventMsg,
   MJInfo,
   MJSettings,
+  MJOptions,
 } from "./interfaces";
 
 import { MidjourneyApi } from "./midjourne.api";
@@ -137,30 +138,42 @@ export class WsMessage {
     this.messageUpdate(message);
   }
   private messageUpdate(message: any) {
-    // this.log("messageUpdate", JSON.stringify(message));
+    const {
+      content,
+      embeds,
+      interaction = {},
+      nonce,
+      id,
+      components,
+    } = message;
 
-    const { content, embeds, interaction, nonce, id } = message;
-    //settings
-    if (interaction.name === "settings" && !nonce) {
-      this.emit("settings", message);
-      return;
+    if (!nonce) {
+      const { name } = interaction;
+
+      switch (name) {
+        case "settings":
+          this.emit("settings", message);
+          return;
+        case "describe":
+          this.emitDescribe(id, {
+            descriptions: embeds?.[0]?.description.split("\n\n"),
+            options: formatOptions(components),
+          });
+          break;
+        case "info":
+          this.emit("info", embeds?.[0]?.description);
+          return;
+      }
     }
-    //describe
-    if (interaction.name === "describe" && !nonce) {
-      this.emitDescribe(id, embeds[0].description);
+    if (content) {
+      this.processingImage(message);
     }
-    //info
-    if (interaction.name === "info" && !nonce) {
-      this.emit("info", embeds[0].description);
-      return;
-    }
-    if (content === "") {
-      return;
-    }
-    this.processingImage(message);
   }
   private processingImage(message: any) {
     const { content, id, attachments, flags } = message;
+    if (!content) {
+      return;
+    }
     const event = this.getEventById(id);
     if (!event) {
       return;
@@ -417,10 +430,12 @@ export class WsMessage {
   }
 
   async waitDescribe(nonce: string) {
-    return new Promise<string[] | null>((resolve) => {
+    return new Promise<{
+      options: MJOptions[];
+      descriptions: string[];
+    } | null>((resolve) => {
       this.onceDescribe(nonce, (message) => {
-        const data = message.split("\n\n");
-        resolve(data);
+        resolve(message);
       });
     });
   }
