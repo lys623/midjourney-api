@@ -42,12 +42,13 @@ export class Command {
 
     if ("application_commands" in data) {
       const application_commands = data.application_commands;
-      if (application_commands[0]) {
-        // console.log(
-        //   `got ${name} application_commands`,
-        //   application_commands[0]
-        // );
-        return application_commands[0];
+      let filterArr=application_commands.filter((item:any)=>item.name===name);
+      if (filterArr[0]) {
+          // console.log(
+          //   `got ${name} application_commands`,
+          //   application_commands[0]
+          // );
+          return filterArr[0];
       }
     }
 
