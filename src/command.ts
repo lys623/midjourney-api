@@ -78,8 +78,19 @@ export class Command {
       headers: { authorization: this.config.SalaiToken },
     });
     const data = await response.json();
-    if (data?.application_commands?.[0]) {
-      return data.application_commands[0];
+    if ("application_commands" in data) {
+      const application_commands = data.application_commands;
+      let filterArr=application_commands.filter((item:any)=>item.name===name);
+      if (filterArr[0]) {
+          // console.log(
+          //   `got ${name} application_commands`,
+          //   application_commands[0]
+          // );
+          return filterArr[0]
+      }
+      if(application_commands[0]){
+        return application_commands[0]
+      }
     }
     throw new Error(`Failed to get application_commands for command ${name}`);
   }
