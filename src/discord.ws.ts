@@ -85,6 +85,7 @@ export class WsMessage {
   }
   //try reconnect
   reconnect() {
+    return;
     if (this.closed) return;
     this.ws = new this.config.WebSocket(this.config.WsBaseUrl);
     this.heartbeatInterval = 0;
