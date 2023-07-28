@@ -36,7 +36,7 @@ export class Midjourney extends MidjourneyMessage {
       return this;
     }
     //if auth failed, will throw error
-    if (this.config.ServerId) {
+    if (this.config.ChannelId) {
       await this.MJApi.getCommand("settings");
     } else {
       await this.MJApi.allCommand();

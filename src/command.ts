@@ -35,7 +35,7 @@ export class Command {
     if (this.cache[name] !== undefined) {
       return this.cache[name];
     }
-    if (this.config.ServerId) {
+    if (this.config.ChannelId) {
       const command = await this.getCommand(name);
       this.cache[name] = command;
       return command;
