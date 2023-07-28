@@ -1,6 +1,6 @@
 {
   "name": "mj-api",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Node.js client for the unofficial MidJourney API.",
   "main": "libs/index.js",
   "types": "libs/index.d.ts",
@@ -9,7 +9,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "prettier": "prettier --write .",
-    "prettier:check": "prettier --check ."
+    "prettier:check": "prettier --check .",
+    "example:imagine": "tsx ./examples/imagine-ws.ts"
   },
   "files": [
     "libs/*",
@@ -32,7 +33,7 @@
   },
   "homepage": "https://github.com/lys623/midjourney-api#readme",
   "devDependencies": {
-    "@types/mime": "^3.0.1",
+    "@types/async": "^3.2.20",
     "@types/node": "^18.16.0",
     "@types/ws": "^8.5.4",
     "dotenv": "^16.0.3",
@@ -43,9 +44,9 @@
   },
   "dependencies": {
     "@huggingface/inference": "^2.5.0",
+    "async": "^3.2.4",
     "isomorphic-ws": "^5.0.0",
-    "mime": "^3.0.0",
-    "p-queue": "^6.6.2",
+    "semiver": "^1.1.0",
     "snowyflake": "^2.0.0",
     "tslib": "^2.5.0",
     "ws": "^8.13.0"
