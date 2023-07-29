@@ -92,7 +92,7 @@ export class Command {
         return application_commands[0]
       }
     }
-    throw new Error(`Failed to get application_commands for command ${name}`);
+    console.log(`Failed to get application_commands for command ${name}`);
   }
   async imaginePayload(prompt: string, nonce?: string) {
     const data = await this.commandData("imagine", [

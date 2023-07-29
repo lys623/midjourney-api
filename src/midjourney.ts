@@ -102,7 +102,8 @@ export class Midjourney extends MidjourneyMessage {
     const nonce = nextNonce();
     const httpStatus = await this.MJApi.SettingsApi(nonce);
     if (httpStatus !== 204) {
-      throw new Error(`ImagineApi failed with status ${httpStatus}`);
+      // throw new Error(`ImagineApi failed with status ${httpStatus}`);
+      return;
     }
     return wsClient.waitSettings();
   }
