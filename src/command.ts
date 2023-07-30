@@ -1,5 +1,8 @@
 import { DiscordImage, MJConfig } from "./interfaces";
 
+export const SdCommandNames=[
+  'dream'
+]
 export const Commands = [
   "ask",
   "blend",
@@ -18,7 +21,7 @@ export const Commands = [
   "shorten",
   "subscribe",
 ] as const;
-export type CommandName = (typeof Commands)[number];
+export type CommandName = (typeof Commands)[number]|(typeof SdCommandNames)[number];
 function getCommandName(name: string): CommandName | undefined {
   for (const command of Commands) {
     if (command === name) {
@@ -103,6 +106,10 @@ export class Command {
       },
     ]);
     return this.data2Paylod(data, nonce);
+  }
+  async imagineSdPayload() {
+    const data = await this.commandData("dream");
+    return data
   }
   async PreferPayload(nonce?: string) {
     const data = await this.commandData("prefer", [

@@ -81,6 +81,27 @@ export class MidjourneyApi extends Command {
     const payload = await this.imaginePayload(prompt, nonce);
     return this.safeIteractions(payload);
   }
+  async ImagineSDApi(prompts: any[], nonce: string = nextNonce()) {
+    const command=await this.imagineSdPayload();
+    const payload ={
+      "type":2,
+      "application_id":"1101146088049750076",
+      channel_id: this.config.ChannelId,
+      guild_id: this.config.ServerId,
+      "session_id":"2e078a27f75831f10589a13429c76f2c",
+      "data":{
+        version: command.version,
+        id: command.id,
+        name: command.name,
+        type: command.type,
+        "options":prompts,
+        "application_command":command,
+        "attachments":[]
+      },
+      "nonce":nonce,
+    }
+    return this.safeIteractions(payload);
+  }
 
   async SwitchRemixApi(nonce: string = nextNonce()) {
     const payload = await this.PreferPayload(nonce);

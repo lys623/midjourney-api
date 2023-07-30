@@ -10,6 +10,7 @@ import {
   OnModal,
   MJShorten,
   MJDescribe,
+  SdBotId
 } from "./interfaces";
 import { MidjourneyApi } from "./midjourne.api";
 import {
@@ -78,7 +79,7 @@ export class WsMessage {
     return new Promise((resolve) => {
       this.once("ready", (user) => {
         //print user nickname
-        console.log(`🎊 ws ready!!! Hi: ${user.global_name}`);
+        console.log(`🎊 ws ready!!! Hi: ${user.global_name||user.email}`);
         resolve(this);
       });
     });
@@ -277,7 +278,7 @@ export class WsMessage {
     const { channel_id, author, interaction } = message;
     if (channel_id !== this.config.ChannelId) return;
     if (author?.id !== this.config.BotId) return;
-    if (interaction && interaction.user.id !== this.UserId) return;
+    // if (interaction && interaction.user.id !== this.UserId) return;
     // this.log("[messageCreate]", JSON.stringify(message));
     this.messageCreate(message);
   }
@@ -414,7 +415,12 @@ export class WsMessage {
       uri: uri,
       proxy_url: attachments[0].proxy_url,
       options: formatOptions(components),
+      originMessage:message
     };
+    if(message.author&&message.author.id===SdBotId){
+      // SD Bot;
+      return;
+    }
     this.filterMessages(MJmsg);
     return;
   }
@@ -458,7 +464,7 @@ export class WsMessage {
       message: MJmsg,
     };
     if (!event) {
-      this.log("FilterMessages not found.", MJmsg, this.waitMjEvents);
+      this.log("FilterMessages not found.", MJmsg.content);
       this.emitImage('notFoundCallback', eventMsg);
       return;
     }
