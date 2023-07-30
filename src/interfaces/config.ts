@@ -8,7 +8,7 @@ export const SdBotId = "1101146088049750076";
 export interface MJConfig {
   ChannelId: string;
   SalaiToken: string;
-  BotId: typeof MJBot | typeof NijiBot 
+  BotId: typeof MJBot | typeof NijiBot |typeof SdBotId
   Debug: boolean;
   Limit: number;
   MaxWait: number;
