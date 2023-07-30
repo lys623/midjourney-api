@@ -12,46 +12,34 @@ async function main() {
     ServerId: <string>process.env.SERVER_ID,
     ChannelId: <string>process.env.CHANNEL_ID,
     SalaiToken: <string>process.env.SALAI_TOKEN,
-    // Debug: true,
+    Debug: true,
     Ws: true,
     BotId:'1101146088049750076',
   });
   await client.Connect();
-  client.wsClient?.on('messageCreate',function(event){
+  client.wsClient?.on('notFoundCallback',function(event){
     if(event.author.username!=='StableDreamer') return;
-    if(!event.attachments.length){
-      // create
-      if(event.flags===0){
-        console.log('create success',event.content,event.id)
-      }else{
-        console.log('create fail',event.content)
-      }
-    }else{
-      // done
-      console.log('image done',event)
-    }
+    console.log('notFoundCallback',event)
   })
   console.log('client',client.config.SalaiToken)
-  let res= await client.ImagineSD([
+  const options=[
     {
       "type":3,
       "name":"prompt",
       "value":"a new ffxiv pirate job, miqote with blue hair, eyepatch, pirate hat, peg leg"
     },
-    // {
-    //   "type":3,
-    //   "name":"style",
-    //   "value":"Comic Book"
-    // },
     {
       "type":3,
       "name":"aspect",
       "value":"1:1"
-    }])
+    }
+  ]
+  client.ImagineSD(options).then((res)=>{
+      console.log('res',res)
+    }).catch((error)=>{
+      console.log('error',error)
+    })
   // const msg = await client.Info();
-  // console.log({ msg });
-  console.log('res',res)
-  // client.Close();
 }
 main()
   .then(() => {
