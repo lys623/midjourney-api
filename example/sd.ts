@@ -35,7 +35,7 @@ async function main() {
     }
   ]
   client.ImagineSD(options).then((res)=>{
-      console.log('res',res)
+      console.log('res',res.originMessage)
     }).catch((error)=>{
       console.log('error',error)
     })

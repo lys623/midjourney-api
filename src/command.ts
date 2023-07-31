@@ -175,6 +175,9 @@ export class Command {
     attachments: any[] = []
   ) {
     const command = await this.cacheCommand(name);
+    if(!command){
+      return {};
+    }
     const data = {
       version: command.version,
       id: command.id,
