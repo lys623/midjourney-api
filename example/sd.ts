@@ -17,7 +17,12 @@ async function main() {
     BotId:'1101146088049750076',
   });
   await client.Connect();
+  
   client.wsClient?.on('notFoundCallback',function(event){
+    if(event.author.username!=='StableDreamer') return;
+    console.log('notFoundCallback',event)
+  })
+  client.wsClient?.on('messageDelete',function(event){
     if(event.author.username!=='StableDreamer') return;
     console.log('notFoundCallback',event)
   })
