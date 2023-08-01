@@ -52,9 +52,16 @@ export class Midjourney extends MidjourneyMessage {
     if (settings) {
       // this.log(`settings:`, settings.content);
       const remix = settings.options.find((o) => o.label === "Remix mode");
+     
       if (remix?.style == 3) {
-        this.config.Remix = true;
-        this.log(`Remix mode enabled`);
+        if(this.config.disableRemix){
+           const remixRes=await this.SwitchRemix();
+           this.config.Remix = false;
+           this.log(`Remix mode disable`,remixRes);
+        }else{
+          this.config.Remix = true;
+          this.log(`Remix mode enabled`);
+        }
       }
     }
     return this;

@@ -14,6 +14,7 @@ export interface MJConfig {
   MaxWait: number;
   SessionId: string;
   ServerId?: string;
+  disableRemix?: boolean;
   Ws?: boolean;
   Remix?: boolean;
   HuggingFaceToken?: string;
@@ -30,6 +31,7 @@ export interface MJConfigParam {
   ServerId?: string; //DISCORD_SERVER_ID
   BotId?: typeof MJBot | typeof NijiBot | typeof SdBotId; //DISCORD_BOT_ID MJBot OR NijiBot
   Debug?: boolean; // print log
+  disableRemix?: boolean;
   ApiInterval?: number; //ApiInterval request api interval
   Limit?: number; //Limit of get message list
   MaxWait?: number;
