@@ -176,7 +176,7 @@ export class Command {
   ) {
     const command = await this.cacheCommand(name);
     if(!command){
-      return {};
+      return {} as any;
     }
     const data = {
       version: command.version,
