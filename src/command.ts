@@ -95,7 +95,7 @@ export class Command {
         return application_commands[0]
       }
     }
-    console.log(`Failed to get application_commands for command ${name}`);
+    console.log(`Failed to get application_commands for command ${name}`,this.config.ChannelId);
   }
   async imaginePayload(prompt: string, nonce?: string) {
     const data = await this.commandData("imagine", [
