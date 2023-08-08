@@ -113,6 +113,29 @@ export class Midjourney extends MidjourneyMessage {
       return msg;
     }
   }
+  async ImagineSDVote(prompt: any, opts:{message_id:string},loading?: LoadingHandler) {
+    await this.getWsClient();
+    const nonce = nextNonce();
+    this.log(`Imagine`, prompt, "nonce", nonce);
+    const httpStatus = await this.MJApi.ImagineSDDmVoteApi(prompt, nonce,opts);
+    if (httpStatus !== 204) {
+      console.log(`ImagineApi failed with status ${httpStatus}`);
+      if(this.wsClient){
+        return new Promise((resolve,reject)=>{
+          reject(httpStatus)
+        })
+      }
+      return httpStatus
+    }
+    if (this.wsClient) {
+      return await this.wsClient.waitSdImageMessage({ nonce, loading, prompt:nonce });
+    } else {
+      this.log(`await generate image`);
+      const msg = await this.WaitMessage(prompt, loading);
+      this.log(`image generated`, prompt, msg?.uri);
+      return msg;
+    }
+  }
   // check ws enabled && connect
   private async getWsClient() {
     if (!this.config.Ws) {

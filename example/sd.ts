@@ -23,7 +23,7 @@ async function main() {
     console.log('notFoundCallback',event)
   })
   client.wsClient?.on('messageDelete',function(event){
-    if(event.author.username!=='StableDreamer') return;
+    if(event.author&&event.author.username!=='StableDreamer') return;
     console.log('notFoundCallback',event)
   })
   console.log('client',client.config.SalaiToken)
@@ -41,6 +41,16 @@ async function main() {
   ]
   client.ImagineSD(options).then((res)=>{
       console.log('res',res.originMessage)
+      const msgId=res.originMessage.id
+      setTimeout(()=>{
+        client.ImagineSDVote('dmb',{
+          message_id:msgId
+        }).then((res)=>{
+          console.log('dmb',res)
+        }).catch((error)=>{
+          console.log('error',error)
+        })
+      },3000)
     }).catch((error)=>{
       console.log('error',error)
     })
