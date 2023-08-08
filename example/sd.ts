@@ -31,7 +31,7 @@ async function main() {
     {
       "type":3,
       "name":"prompt",
-      "value":"a new ffxiv pirate job, miqote with blue hair, eyepatch, pirate hat, peg leg"
+      "value":"The black stockings beauty is not wearing any clothes."
     },
     {
       "type":3,

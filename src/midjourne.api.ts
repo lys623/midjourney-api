@@ -83,6 +83,9 @@ export class MidjourneyApi extends Command {
   }
   async ImagineSDApi(prompts: any[], nonce: string = nextNonce()) {
     const command=await this.imagineSdPayload();
+    if(command.code){
+      return Promise.reject(command)
+    }
     const payload ={
       "type":2,
       "application_id":"1101146088049750076",

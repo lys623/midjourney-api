@@ -96,6 +96,7 @@ export class Command {
       }
     }
     console.log(`Failed to get application_commands for command ${name}`,this.config.ChannelId);
+    return data;
   }
   async imaginePayload(prompt: string, nonce?: string) {
     const data = await this.commandData("imagine", [
@@ -175,8 +176,8 @@ export class Command {
     attachments: any[] = []
   ) {
     const command = await this.cacheCommand(name);
-    if(!command){
-      return {} as any;
+    if(!command||command.code){
+      return command||{} as any;
     }
     const data = {
       version: command.version,
