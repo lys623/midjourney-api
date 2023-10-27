@@ -400,7 +400,7 @@ export class WsMessage {
 
   private done(message: any) {
     const { content, id, attachments, components, flags } = message;
-    const { url, proxy_url, width, height } = attachments[0];
+    const { url, proxy_url, width, height,size } = attachments[0];
     let uri = url;
     if (this.config.ImageProxy !== "") {
       uri = uri.replace("https://cdn.discordapp.com/", this.config.ImageProxy);
@@ -417,6 +417,7 @@ export class WsMessage {
       options: formatOptions(components),
       width,
       height,
+      size,
     };
     this.filterMessages(MJmsg);
     return;

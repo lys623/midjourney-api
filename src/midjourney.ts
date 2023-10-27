@@ -293,9 +293,9 @@ export class Midjourney extends MidjourneyMessage {
               }
               return newNonce;
             case "variation":
-              if (this.config.Remix !== true) {
-                return "";
-              }
+              // if (this.config.Remix !== true) {
+              //   return "";
+              // }
               customId = toRemixCustom(customId);
               const remixHttpStatus = await this.MJApi.RemixApi({
                 msgId: id,

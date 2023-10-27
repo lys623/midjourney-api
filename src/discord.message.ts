@@ -96,7 +96,7 @@ export class MidjourneyMessage {
         }
         //finished
         const content = item.content.split("**")[1];
-        const { proxy_url, width, height } = item.attachments[0];
+        const { proxy_url, width, height,size } = item.attachments[0];
         const msg: MJMessage = {
           content,
           id: item.id,
@@ -108,6 +108,7 @@ export class MidjourneyMessage {
           options: formatOptions(item.components),
           width,
           height,
+          size
         };
         return msg;
       }
