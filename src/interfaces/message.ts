@@ -8,11 +8,14 @@ export interface MJMessage {
   hash?: string;
   progress?: string;
   options?: MJOptions[];
+  width?: number;
+  height?: number;
+  size?: number;
   originMessage?:any
 }
 
 export type LoadingHandler = (uri: string, progress: string) => void;
-export type OnModal = (nonce: string, id: string) => Promise<string>;
+export type OnModal = (nonce: string, id: string,opts?:any) => Promise<string>;
 
 export interface WaitMjEvent {
   nonce: string;

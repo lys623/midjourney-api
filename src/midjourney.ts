@@ -4,7 +4,7 @@ import {
   MJConfig,
   MJConfigParam,
 } from "./interfaces";
-import { MidjourneyApi } from "./midjourne.api";
+import { MidjourneyApi } from "./midjourney.api";
 import { MidjourneyMessage } from "./discord.message";
 import {
   toRemixCustom,
@@ -327,7 +327,7 @@ export class Midjourney extends MidjourneyMessage {
         loading,
         messageId: msgId,
         prompt: content,
-        onmodal: async (nonde, id) => {
+        onmodal: async (nonde, id,opts) => {
           if (content === undefined || content === "") {
             return "";
           }
@@ -346,10 +346,12 @@ export class Midjourney extends MidjourneyMessage {
                 );
               }
               return newNonce;
+            case 'inpaint':
+              return newNonce;  
             case "variation":
-              if (this.config.Remix !== true) {
-                return "";
-              }
+              // if (this.config.Remix !== true) {
+              //   return "";
+              // }
               customId = toRemixCustom(customId);
               const remixHttpStatus = await this.MJApi.RemixApi({
                 msgId: id,

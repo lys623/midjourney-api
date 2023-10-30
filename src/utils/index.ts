@@ -143,6 +143,8 @@ export function custom2Type(custom: string) {
     return "variation";
   } else if (custom.includes("remaster")) {
     return "reroll";
+  } else if(custom.includes('Inpaint')){
+    return "inpaint";
   }
   return null;
 }

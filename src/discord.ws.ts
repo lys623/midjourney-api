@@ -12,7 +12,7 @@ import {
   MJDescribe,
   SdBotId
 } from "./interfaces";
-import { MidjourneyApi } from "./midjourne.api";
+import { MidjourneyApi } from "./midjourney.api";
 import {
   content2progress,
   content2prompt,
@@ -267,19 +267,22 @@ export class WsMessage {
   private async onInteractionSuccess({
     nonce,
     id,
+    ...others
   }: {
     nonce: string;
     id: string;
+    others:any
   }) {
     // this.log("interactionSuccess", nonce, id);
     const event = this.getEventByNonce(nonce);
     if (!event) {
       return;
     }
-    event.onmodal && event.onmodal(nonce, id);
+    event.onmodal && event.onmodal(nonce, id,others);
   }
-  private async onReady(user: any) {
-    this.UserId = user.id;
+  private async onReady(data: any) {
+    this.UserId = data.user.id;
+    this.config.SessionId=data.session_id
   }
   private async onMessageCreate(message: any) {
     const { channel_id, author, interaction } = message;
@@ -318,11 +321,11 @@ export class WsMessage {
     if (message.channel_id === this.config.ChannelId) {
       this.log(data);
     }
-    this.log("event", msg.t);
+    this.log("new msg:------\n", msg.t);
     // console.log(data);
     switch (msg.t) {
       case "READY":
-        this.emitSystem("ready", message.user);
+        this.emitSystem("ready", message);
         break;
       case "MESSAGE_CREATE":
         this.emitSystem("messageCreate", message);
@@ -333,6 +336,7 @@ export class WsMessage {
       case "MESSAGE_DELETE":
         this.emitSystem("messageDelete", message);
       case "INTERACTION_SUCCESS":
+      case "INTERACTION_IFRAME_MODAL_CREATE":
         if (message.nonce) {
           this.emitSystem("interactionSuccess", message);
         }
@@ -358,6 +362,7 @@ export class WsMessage {
       });
       this.log("appeal.httpStatus", httpStatus);
       if (httpStatus == 204) {
+        //todo
         this.on(newnonce, (data) => {
           this.emit(nonce, data);
         });
@@ -408,7 +413,8 @@ export class WsMessage {
 
   private done(message: any) {
     const { content, id, attachments, components, flags } = message;
-    let uri = attachments[0].url;
+    const { url, proxy_url, width, height,size } = attachments[0];
+    let uri = url;
     if (this.config.ImageProxy !== "") {
       uri = uri.replace("https://cdn.discordapp.com/", this.config.ImageProxy);
     }
@@ -417,11 +423,14 @@ export class WsMessage {
       id,
       flags,
       content,
-      hash: uriToHash(attachments[0].url),
+      hash: uriToHash(url),
       progress: "done",
-      uri: uri,
-      proxy_url: attachments[0].proxy_url,
+      uri,
+      proxy_url,
       options: formatOptions(components),
+      width,
+      height,
+      size,
       originMessage:message
     };
     if(message.author&&message.author.id===SdBotId){
@@ -695,17 +704,22 @@ export class WsMessage {
       this.waitMjEvents.set(nonce, {
         nonce,
         prompt,
-        onmodal: async (nonce, id) => {
+        onmodal: async (oldnonce, id,opts) => {
+          if(opts&&opts.custom_id&&opts.custom_id.includes('iframe')){
+             this.removeWaitMjEvent(oldnonce);
+            resolve(opts);
+            return '';
+          }
           if (onmodal === undefined) {
             // reject(new Error("onmodal is not defined"))
             return "";
           }
-          var nonce = await onmodal(nonce, id);
+          var nonce = await onmodal(oldnonce, id,opts);
           if (nonce === "") {
             // reject(new Error("onmodal return empty nonce"))
             return "";
           }
-          this.removeWaitMjEvent(nonce);
+          this.removeWaitMjEvent(oldnonce);
           this.waitMjEvents.set(nonce, { nonce });
           this.onceImage(nonce, handleImageMessage);
           return nonce;
