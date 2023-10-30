@@ -14,21 +14,60 @@ async function main() {
     SalaiToken: <string>process.env.SALAI_TOKEN,
     HuggingFaceToken: <string>process.env.HUGGINGFACE_TOKEN,
     Debug: true,
-    Ws: true,
+    Ws: true, // required  `Only you can see this`
   });
-  await client.init();
-  const msg = await client.Imagine(
-    "the queen of the underworld, race: vampire, appearance: delicate features with detailed portrayal, super exquisite facial features, silver long hair reaching ankles, silver pupils, fair skin with a hint of melancholy in the eyes, beautiful and noble, clothing: wearing a blood-red rose on the hair, skirt with layers of lace, sitting in a (pose), captured in ultra-high resolution, film-like realism, 8k for the best visual quality, super clear and finely drawn. --ar 9:16 --v 5",
+  await client.Connect(); // required
+  const Imagine = await client.Imagine(
+    "Red hamster smoking a cigaret --fast",
     (uri: string, progress: string) => {
-      console.log("loading", uri, "progress", progress);
+      console.log("Imagine.loading", uri, "progress", progress);
     }
   );
-  console.log({ msg });
+  console.log({ Imagine });
+  if (!Imagine) {
+    return;
+  }
+  const reroll = await client.Reroll({
+    msgId: <string>Imagine.id,
+    hash: <string>Imagine.hash,
+    flags: Imagine.flags,
+    loading: (uri: string, progress: string) => {
+      console.log("Reroll.loading", uri, "progress", progress);
+    },
+  });
+  console.log({ reroll });
+
+  const Variation = await client.Variation({
+    index: 2,
+    msgId: <string>Imagine.id,
+    hash: <string>Imagine.hash,
+    flags: Imagine.flags,
+    loading: (uri: string, progress: string) => {
+      console.log("Variation.loading", uri, "progress", progress);
+    },
+  });
+
+  console.log({ Variation });
+  if (!Variation) {
+    return;
+  }
+  const Upscale = await client.Upscale({
+    index: 2,
+    msgId: <string>Variation.id,
+    hash: <string>Variation.hash,
+    flags: Variation.flags,
+    loading: (uri: string, progress: string) => {
+      console.log("Upscale.loading", uri, "progress", progress);
+    },
+  });
+  console.log({ Upscale });
+
+  client.Close();
 }
 main()
   .then(() => {
-    console.log("finished");
-    process.exit(0);
+    // console.log("finished");
+    // process.exit(0);
   })
   .catch((err) => {
     console.log("finished");

@@ -1,24 +1,40 @@
 # Table of contents
 
-* [👋 Welcome to A Product](README.md)
+* [👋 MidJourney Node Client](README.md)
 
-## Overview
+## 📓 Getting started
 
-* [💡 What we do](overview/what-we-do.md)
-* [✨ Our Features](overview/our-features.md)
+* [Quickstart](getting-started/quickstart.md)
+* [Install](getting-started/install.md)
+* [Config](getting-started/config.md)
+* [API Reference](getting-started/api-reference/README.md)
+  * [imagine](getting-started/api-reference/imagine.md)
+  * [variation](getting-started/api-reference/variation.md)
+  * [upscale](getting-started/api-reference/upscale.md)
+  * [reroll](getting-started/api-reference/reroll.md)
+  * [blend](getting-started/api-reference/blend.md)
+  * [describe](getting-started/api-reference/describe.md)
+  * [info](getting-started/api-reference/info.md)
+  * [fast](getting-started/api-reference/fast.md)
+  * [relax](getting-started/api-reference/relax.md)
+  * [setting](getting-started/api-reference/setting.md)
+  * [reset](getting-started/api-reference/reset.md)
+* [Example](getting-started/example/README.md)
+  * [Imagine](getting-started/example/imagine.md)
 
-## Product Guides
+## FAQ
 
-* [📪 Making a post](product-guides/making-a-post.md)
-* [📎 Understanding Projects](product-guides/understanding-projects.md)
+* [vercel](faq/vercel.md)
+* [node.js <18](faq/node.js-less-than-18.md)
+* [proxy](faq/proxy.md)
+* [How to get your Discord Token](https://www.androidauthority.com/get-discord-token-3149920/)
+* [Invite Midjourney Bot to Your Server](https://docs.midjourney.com/docs/invite-the-bot)
 
-## Fundamentals
+***
 
-* [🛠 Getting set up](fundamentals/getting-set-up/README.md)
-  * [📝 Setting permissions](fundamentals/getting-set-up/setting-permissions.md)
-  * [🧑 Inviting Members](fundamentals/getting-set-up/inviting-members.md)
+* [Join the Beta](https://discord.com/invite/GavuGHQbV4)
 
 ## Use Cases
 
-* [🎨 For Designers](use-cases/for-designers.md)
-* [🖥 For Developers](use-cases/for-developers.md)
+* [🎨 Web UI](use-cases/web-ui.md)
+* [🤖 Discord Bot](use-cases/discord-bot.md)

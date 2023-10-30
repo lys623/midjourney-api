@@ -12,26 +12,32 @@ async function main() {
     ServerId: <string>process.env.SERVER_ID,
     ChannelId: <string>process.env.CHANNEL_ID,
     SalaiToken: <string>process.env.SALAI_TOKEN,
-    Debug: true,
+    // Debug: true,
     Ws: true,
   });
-  await client.init();
-  const msg = await client.Imagine("a cool cat, blue ears, yellow hat");
-  console.log({ msg });
-  if (!msg) {
-    console.log("no message");
-    return;
-  }
-  const msg2 = await client.Upscale(
-    msg.content,
-    2,
-    <string>msg.id,
-    <string>msg.hash,
+  await client.Connect();
+  const Imagine = await client.Imagine(
+    "a cool cat, blue ears, yellow hat --v 4",
     (uri: string, progress: string) => {
       console.log("loading", uri, "progress", progress);
     }
   );
-  console.log({ msg2 });
+  console.log(Imagine);
+  if (!Imagine) {
+    console.log("no message");
+    return;
+  }
+  const Upscale = await client.Upscale({
+    index: 2,
+    msgId: <string>Imagine.id,
+    hash: <string>Imagine.hash,
+    flags: Imagine.flags,
+    loading: (uri: string, progress: string) => {
+      console.log("loading", uri, "progress", progress);
+    },
+  });
+  console.log(Upscale);
+  client.Close();
 }
 main().catch((err) => {
   console.error(err);
