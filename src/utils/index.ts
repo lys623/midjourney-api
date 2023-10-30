@@ -7,9 +7,13 @@ export const sleep = async (ms: number): Promise<void> =>
 export const random = (min: number, max: number): number =>
   Math.floor(Math.random() * (max - min) + min);
 
+  const workerId = BigInt(0); // 使用 BigInt 方法将数字转换为 BigInt
+const processId = BigInt(0); // 使用 BigInt 方法将数字转换为 BigInt
+
+
 const snowflake = new Snowyflake({
-  workerId: 0n,
-  processId: 0n,
+  workerId: workerId,
+  processId: processId,
   epoch: Epoch.Discord, // BigInt timestamp
 });
 
