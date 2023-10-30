@@ -194,7 +194,7 @@ export class Command {
   protected data2Paylod(data: any, nonce?: string) {
     const payload = {
       type: 2,
-      application_id: data.application_command.application_id,
+      application_id: data.application_command?data.application_command.application_id:'',
       guild_id: this.config.ServerId,
       channel_id: this.config.ChannelId,
       session_id: this.config.SessionId,
