@@ -3,6 +3,7 @@ export interface MJMessage {
   proxy_url?: string;
   content: string;
   flags: number;
+  author?: any;
   id?: string;
   hash?: string;
   progress?: string;
@@ -10,6 +11,7 @@ export interface MJMessage {
   width?: number;
   height?: number;
   size?: number;
+  originMessage?:any
 }
 
 export type LoadingHandler = (uri: string, progress: string) => void;

@@ -36,7 +36,7 @@ export class Midjourney extends MidjourneyMessage {
       return this;
     }
     //if auth failed, will throw error
-    if (this.config.ServerId) {
+    if (this.config.ChannelId) {
       await this.MJApi.getCommand("settings");
     } else {
       await this.MJApi.allCommand();
@@ -52,9 +52,16 @@ export class Midjourney extends MidjourneyMessage {
     if (settings) {
       // this.log(`settings:`, settings.content);
       const remix = settings.options.find((o) => o.label === "Remix mode");
+     
       if (remix?.style == 3) {
-        this.config.Remix = true;
-        this.log(`Remix mode enabled`);
+        if(this.config.disableRemix){
+           const remixRes=await this.SwitchRemix();
+           this.config.Remix = false;
+           this.log(`Remix mode disable`,remixRes);
+        }else{
+          this.config.Remix = true;
+          this.log(`Remix mode enabled`);
+        }
       }
     }
     return this;
@@ -83,6 +90,52 @@ export class Midjourney extends MidjourneyMessage {
       return msg;
     }
   }
+  async ImagineSD(prompt: any, loading?: LoadingHandler) {
+    await this.getWsClient();
+    const nonce = nextNonce();
+    this.log(`Imagine`, prompt, "nonce", nonce);
+    const httpStatus = await this.MJApi.ImagineSDApi(prompt, nonce);
+    if (httpStatus !== 204) {
+      console.log(`ImagineApi failed with status ${httpStatus}`);
+      if(this.wsClient){
+        return new Promise((resolve,reject)=>{
+          reject(httpStatus)
+        })
+      }
+      return httpStatus
+    }
+    if (this.wsClient) {
+      return await this.wsClient.waitSdImageMessage({ nonce, loading, prompt:nonce });
+    } else {
+      this.log(`await generate image`);
+      const msg = await this.WaitMessage(prompt, loading);
+      this.log(`image generated`, prompt, msg?.uri);
+      return msg;
+    }
+  }
+  async ImagineSDVote(prompt: any, opts:{message_id:string},loading?: LoadingHandler) {
+    await this.getWsClient();
+    const nonce = nextNonce();
+    this.log(`Imagine`, prompt, "nonce", nonce);
+    const httpStatus = await this.MJApi.ImagineSDDmVoteApi(prompt, nonce,opts);
+    if (httpStatus !== 204) {
+      console.log(`ImagineApi failed with status ${httpStatus}`);
+      if(this.wsClient){
+        return new Promise((resolve,reject)=>{
+          reject(httpStatus)
+        })
+      }
+      return httpStatus
+    }
+    if (this.wsClient) {
+      return await this.wsClient.waitSdImageMessage({ nonce, loading, prompt:nonce });
+    } else {
+      this.log(`await generate image`);
+      const msg = await this.WaitMessage(prompt, loading);
+      this.log(`image generated`, prompt, msg?.uri);
+      return msg;
+    }
+  }
   // check ws enabled && connect
   private async getWsClient() {
     if (!this.config.Ws) {
@@ -102,7 +155,8 @@ export class Midjourney extends MidjourneyMessage {
     const nonce = nextNonce();
     const httpStatus = await this.MJApi.SettingsApi(nonce);
     if (httpStatus !== 204) {
-      throw new Error(`ImagineApi failed with status ${httpStatus}`);
+      // throw new Error(`ImagineApi failed with status ${httpStatus}`);
+      return;
     }
     return wsClient.waitSettings();
   }

@@ -81,6 +81,51 @@ export class MidjourneyApi extends Command {
     const payload = await this.imaginePayload(prompt, nonce);
     return this.safeIteractions(payload);
   }
+  async ImagineSDDmVoteApi(custom_id:string, nonce: string = nextNonce(),opts:{message_id:string}) {
+    const command=await this.imagineSdPayload();
+    if(command.code){
+      return Promise.reject(command)
+    }
+    const payload ={
+      "type":3,
+      "application_id":"1101146088049750076",
+      channel_id: this.config.ChannelId,
+      guild_id: this.config.ServerId,
+      "session_id":"2e078a27f75831f10589a13429c76f2c",
+      "nonce":nonce,
+      "message_flags":0,
+      "message_id":opts.message_id,
+      "data":{
+        "component_type":2,
+        "custom_id":custom_id||"dma"
+      }
+    }
+    return this.safeIteractions(payload);
+  }
+  async ImagineSDApi(prompts: any[], nonce: string = nextNonce()) {
+    const command=await this.imagineSdPayload();
+    if(command.code){
+      return Promise.reject(command)
+    }
+    const payload ={
+      "type":2,
+      "application_id":"1101146088049750076",
+      channel_id: this.config.ChannelId,
+      guild_id: this.config.ServerId,
+      "session_id":"2e078a27f75831f10589a13429c76f2c",
+      "data":{
+        version: command.version,
+        id: command.id,
+        name: command.name,
+        type: command.type,
+        "options":prompts,
+        "application_command":command,
+        "attachments":[]
+      },
+      "nonce":nonce,
+    }
+    return this.safeIteractions(payload);
+  }
 
   async SwitchRemixApi(nonce: string = nextNonce()) {
     const payload = await this.PreferPayload(nonce);

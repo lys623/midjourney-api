@@ -1,5 +1,8 @@
 import { DiscordImage, MJConfig } from "./interfaces";
 
+export const SdCommandNames=[
+  'dream'
+]
 export const Commands = [
   "ask",
   "blend",
@@ -18,7 +21,7 @@ export const Commands = [
   "shorten",
   "subscribe",
 ] as const;
-export type CommandName = (typeof Commands)[number];
+export type CommandName = (typeof Commands)[number]|(typeof SdCommandNames)[number];
 function getCommandName(name: string): CommandName | undefined {
   for (const command of Commands) {
     if (command === name) {
@@ -35,7 +38,7 @@ export class Command {
     if (this.cache[name] !== undefined) {
       return this.cache[name];
     }
-    if (this.config.ServerId) {
+    if (this.config.ChannelId) {
       const command = await this.getCommand(name);
       this.cache[name] = command;
       return command;
@@ -92,7 +95,8 @@ export class Command {
         return application_commands[0]
       }
     }
-    throw new Error(`Failed to get application_commands for command ${name}`);
+    console.log(`Failed to get application_commands for command ${name}`,this.config.ChannelId);
+    return data;
   }
   async imaginePayload(prompt: string, nonce?: string) {
     const data = await this.commandData("imagine", [
@@ -103,6 +107,10 @@ export class Command {
       },
     ]);
     return this.data2Paylod(data, nonce);
+  }
+  async imagineSdPayload() {
+    const data = await this.commandData("dream");
+    return data
   }
   async PreferPayload(nonce?: string) {
     const data = await this.commandData("prefer", [
@@ -168,6 +176,9 @@ export class Command {
     attachments: any[] = []
   ) {
     const command = await this.cacheCommand(name);
+    if(!command||command.code){
+      return command||{} as any;
+    }
     const data = {
       version: command.version,
       id: command.id,

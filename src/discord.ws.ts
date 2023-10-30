@@ -10,6 +10,7 @@ import {
   OnModal,
   MJShorten,
   MJDescribe,
+  SdBotId
 } from "./interfaces";
 import { MidjourneyApi } from "./midjourney.api";
 import {
@@ -78,13 +79,14 @@ export class WsMessage {
     return new Promise((resolve) => {
       this.once("ready", (user) => {
         //print user nickname
-        console.log(`🎊 ws ready!!! Hi: ${user.global_name}`);
+        console.log(`🎊 ws ready!!! Hi: ${user.global_name||user.email}`);
         resolve(this);
       });
     });
   }
   //try reconnect
   reconnect() {
+    return;
     if (this.closed) return;
     this.ws = new this.config.WebSocket(this.config.WsBaseUrl);
     this.heartbeatInterval = 0;
@@ -133,7 +135,7 @@ export class WsMessage {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   private async messageCreate(message: any) {
-    const { embeds, id, nonce, components, attachments } = message;
+    const { embeds, id, nonce, components, attachments,flags,application_id } = message;
     if (nonce) {
       // this.log("waiting start image or info or error");
       this.updateMjEventIdByNonce(id, nonce);
@@ -179,6 +181,13 @@ export class WsMessage {
     if (!nonce && attachments?.length > 0 && components?.length > 0) {
       this.done(message);
       return;
+    }
+
+    if(flags!==0&&application_id===SdBotId){
+      const eventMsg: MJEmit = {
+        error:message
+      };
+      this.emitImage('sdWaitingEvent', eventMsg);
     }
 
     this.messageUpdate(message);
@@ -279,7 +288,7 @@ export class WsMessage {
     const { channel_id, author, interaction } = message;
     if (channel_id !== this.config.ChannelId) return;
     if (author?.id !== this.config.BotId) return;
-    if (interaction && interaction.user.id !== this.UserId) return;
+    // if (interaction && interaction.user.id !== this.UserId) return;
     // this.log("[messageCreate]", JSON.stringify(message));
     this.messageCreate(message);
   }
@@ -422,7 +431,16 @@ export class WsMessage {
       width,
       height,
       size,
+      originMessage:message
     };
+    if(message.author&&message.author.id===SdBotId){
+      // SD Bot;
+      const eventMsg: MJEmit = {
+        message: MJmsg,
+      };
+      this.emitImage('sdWaitingEvent', eventMsg);
+      return;
+    }
     this.filterMessages(MJmsg);
     return;
   }
@@ -466,7 +484,7 @@ export class WsMessage {
       message: MJmsg,
     };
     if (!event) {
-      this.log("FilterMessages not found.", MJmsg, this.waitMjEvents);
+      this.log("FilterMessages not found.", MJmsg.content);
       this.emitImage('notFoundCallback', eventMsg);
       return;
     }
@@ -517,10 +535,13 @@ export class WsMessage {
     this.config.Debug && console.info(...args, new Date().toISOString());
   }
 
-  emit(event: string, message: any) {
-    this.event
-      .filter((e) => e.event === event)
-      .forEach((e) => e.callback(message));
+  emit(event: string, data: any) {
+    const findEventCB=this.event
+      .filter((e) => e.event === event);
+    if(!findEventCB.length&&data.message&&data.message.originMessage.application_id===SdBotId){
+      this.emitImage('notFoundCallback', data.message.originMessage);
+    }
+    findEventCB.forEach((e) => e.callback(data));
   }
   private emitImage(type: string, message: MJEmit) {
     this.emit(type, message);
@@ -616,11 +637,41 @@ export class WsMessage {
       if (error || (message && message.progress === "done")) {
         this.remove(nonce, once);
       }
+      if(nonce==='sdWaitingEvent'){
+        this.remove(nonce, once);
+      }
       callback(data);
     };
     this.event.push({ event: nonce, callback: once });
   }
 
+  async waitSdImageMessage({
+    nonce,
+    prompt,
+    onmodal,
+    messageId,
+    loading,
+  }: {
+    nonce: string;
+    prompt?: string;
+    messageId?: string;
+    onmodal?: OnModal;
+    loading?: LoadingHandler;
+  }) {
+    return new Promise<any>((resolve, reject) => {
+      const handleImageMessage = ({ message, error }: MJEmit) => {
+        if (error) {
+          this.removeWaitMjEvent(nonce);
+          reject(error);
+          return;
+        }
+        this.removeWaitMjEvent(nonce);
+        resolve(message);
+        return;
+      };
+      this.onceImage('sdWaitingEvent', handleImageMessage);
+    });
+  }
   async waitImageMessage({
     nonce,
     prompt,

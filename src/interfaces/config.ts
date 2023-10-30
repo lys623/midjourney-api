@@ -4,15 +4,17 @@ export type FetchFn = typeof fetch;
 export type WebSocketCl = typeof WebSocket;
 export const MJBot = "936929561302675456";
 export const NijiBot = "1022952195194359889";
+export const SdBotId = "1101146088049750076";
 export interface MJConfig {
   ChannelId: string;
   SalaiToken: string;
-  BotId: typeof MJBot | typeof NijiBot;
+  BotId: typeof MJBot | typeof NijiBot |typeof SdBotId
   Debug: boolean;
   Limit: number;
   MaxWait: number;
   SessionId: string;
   ServerId?: string;
+  disableRemix?: boolean;
   Ws?: boolean;
   Remix?: boolean;
   HuggingFaceToken?: string;
@@ -27,8 +29,9 @@ export interface MJConfigParam {
   SalaiToken: string; //DISCORD_TOKEN
   ChannelId?: string; //DISCORD_CHANNEL_ID
   ServerId?: string; //DISCORD_SERVER_ID
-  BotId?: typeof MJBot | typeof NijiBot; //DISCORD_BOT_ID MJBot OR NijiBot
+  BotId?: typeof MJBot | typeof NijiBot | typeof SdBotId; //DISCORD_BOT_ID MJBot OR NijiBot
   Debug?: boolean; // print log
+  disableRemix?: boolean;
   ApiInterval?: number; //ApiInterval request api interval
   Limit?: number; //Limit of get message list
   MaxWait?: number;
