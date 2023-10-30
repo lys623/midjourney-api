@@ -258,19 +258,22 @@ export class WsMessage {
   private async onInteractionSuccess({
     nonce,
     id,
+    ...others
   }: {
     nonce: string;
     id: string;
+    others:any
   }) {
     // this.log("interactionSuccess", nonce, id);
     const event = this.getEventByNonce(nonce);
     if (!event) {
       return;
     }
-    event.onmodal && event.onmodal(nonce, id);
+    event.onmodal && event.onmodal(nonce, id,others);
   }
-  private async onReady(user: any) {
-    this.UserId = user.id;
+  private async onReady(data: any) {
+    this.UserId = data.user.id;
+    this.config.SessionId=data.session_id
   }
   private async onMessageCreate(message: any) {
     const { channel_id, author, interaction } = message;
@@ -309,11 +312,11 @@ export class WsMessage {
     if (message.channel_id === this.config.ChannelId) {
       this.log(data);
     }
-    this.log("event", msg.t);
+    this.log("new msg:------\n", msg.t);
     // console.log(data);
     switch (msg.t) {
       case "READY":
-        this.emitSystem("ready", message.user);
+        this.emitSystem("ready", message);
         break;
       case "MESSAGE_CREATE":
         this.emitSystem("messageCreate", message);
@@ -324,6 +327,7 @@ export class WsMessage {
       case "MESSAGE_DELETE":
         this.emitSystem("messageDelete", message);
       case "INTERACTION_SUCCESS":
+      case "INTERACTION_IFRAME_MODAL_CREATE":
         if (message.nonce) {
           this.emitSystem("interactionSuccess", message);
         }
@@ -649,12 +653,17 @@ export class WsMessage {
       this.waitMjEvents.set(nonce, {
         nonce,
         prompt,
-        onmodal: async (oldnonce, id) => {
+        onmodal: async (oldnonce, id,opts) => {
+          if(opts&&opts.custom_id&&opts.custom_id.includes('iframe')){
+             this.removeWaitMjEvent(oldnonce);
+            resolve(opts);
+            return '';
+          }
           if (onmodal === undefined) {
             // reject(new Error("onmodal is not defined"))
             return "";
           }
-          var nonce = await onmodal(oldnonce, id);
+          var nonce = await onmodal(oldnonce, id,opts);
           if (nonce === "") {
             // reject(new Error("onmodal return empty nonce"))
             return "";

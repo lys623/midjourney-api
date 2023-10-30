@@ -273,7 +273,7 @@ export class Midjourney extends MidjourneyMessage {
         loading,
         messageId: msgId,
         prompt: content,
-        onmodal: async (nonde, id) => {
+        onmodal: async (nonde, id,opts) => {
           if (content === undefined || content === "") {
             return "";
           }
@@ -292,6 +292,8 @@ export class Midjourney extends MidjourneyMessage {
                 );
               }
               return newNonce;
+            case 'inpaint':
+              return newNonce;  
             case "variation":
               // if (this.config.Remix !== true) {
               //   return "";
