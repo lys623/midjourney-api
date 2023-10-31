@@ -1,5 +1,5 @@
 import WebSocket from "isomorphic-ws";
-
+import {fetch} from "../fetch";
 export type FetchFn = typeof fetch;
 export type WebSocketCl = typeof WebSocket;
 export const MJBot = "936929561302675456";
