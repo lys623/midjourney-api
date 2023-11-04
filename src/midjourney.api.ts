@@ -52,19 +52,34 @@ export class MidjourneyApi extends Command {
   private queue = async.queue(this.processRequest, 1);
   private interactions = async (payload: any) => {
     try {
+     
       const headers = {
         "Content-Type": "application/json",
         Authorization: this.config.SalaiToken,
       };
-      const response = await this.config.fetch(
-        `${this.config.DiscordBaseUrl}/api/v9/interactions`,
-        {
-          method: "POST",
-          body: JSON.stringify(payload),
-          headers: headers,
-        }
-      );
+      let response;
+      if(payload.actionType==='Inpaint'){
+        delete payload.actionType;
+        response = await this.config.fetch( `https://936929561302675456.discordsays.com/inpaint/api/submit-job`,
+          {
+            method: "POST",
+            body: JSON.stringify(payload),
+            headers: headers,
+          }
+        );
+      }else{
+        response = await this.config.fetch(
+          `${this.config.DiscordBaseUrl}/api/v9/interactions`,
+          {
+            method: "POST",
+            body: JSON.stringify(payload),
+            headers: headers,
+          }
+        );
+      }
+    
       if (response.status >= 400) {
+        console.log('response',response)
         console.error("api.error.config", {
           payload: JSON.stringify(payload),
           config: this.config,
@@ -203,11 +218,13 @@ export class MidjourneyApi extends Command {
     customId,
     flags,
     nonce = nextNonce(),
+    customData
   }: {
     msgId: string;
     customId: string;
     flags: number;
     nonce?: string;
+    customData?: any; // 
   }) {
     if (!msgId) throw new Error("msgId is empty");
     if (flags === undefined) throw new Error("flags is undefined");
@@ -224,8 +241,9 @@ export class MidjourneyApi extends Command {
         component_type: 2,
         custom_id: customId,
       },
+     
     };
-    return this.safeIteractions(payload);
+    return this.safeIteractions(customData?customData:payload);
   }
 
   //FIXME: get SubmitCustomId from discord api

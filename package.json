@@ -21,8 +21,7 @@
     "type": "git",
     "url": "git+https://github.com/lys623/midjourney-api.git"
   },
-  "keywords": [
-  ],
+  "keywords": [],
   "engines": {
     "node": ">=18"
   },
@@ -46,6 +45,7 @@
     "@huggingface/inference": "^2.5.0",
     "async": "^3.2.4",
     "isomorphic-ws": "^5.0.0",
+    "node-fetch": "^3.3.2",
     "semiver": "^1.1.0",
     "snowyflake": "^2.0.0",
     "tslib": "^2.5.0",

@@ -301,12 +301,14 @@ export class Midjourney extends MidjourneyMessage {
     content,
     flags,
     loading,
+    customData
   }: {
     msgId: string;
     customId: string;
     content?: string;
     flags: number;
     loading?: LoadingHandler;
+    customData?: any;
   }) {
     if (this.config.Ws) {
       await this.getWsClient();
@@ -317,8 +319,9 @@ export class Midjourney extends MidjourneyMessage {
       customId,
       flags,
       nonce,
+      customData
     });
-    if (httpStatus !== 204) {
+    if (httpStatus !== 204&&httpStatus !== 200) {
       throw new Error(`CustomApi failed with status ${httpStatus}`);
     }
     if (this.wsClient) {
