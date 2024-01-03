@@ -92,7 +92,7 @@
 4.  现在可以运行示例了
 
     ```bash
-    npx tsx example/imagine-ws.ts
+    npx tsx example/test.ts
     ```
 
     或者

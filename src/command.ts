@@ -33,7 +33,7 @@ function getCommandName(name: string): CommandName | undefined {
 export class Command {
   constructor(public config: MJConfig) {}
   cache: Partial<Record<CommandName, Command>> = {};
-
+  application_commands_res:any;
   async cacheCommand(name: CommandName) {
     if (this.cache[name] !== undefined) {
       return this.cache[name];
@@ -69,6 +69,7 @@ export class Command {
   }
 
   async getCommand(name: CommandName) {
+
     const searchParams = new URLSearchParams({
       type: "1",
       query: name,
@@ -76,14 +77,20 @@ export class Command {
       include_applications: "true",
       // command_ids: `${this.config.BotId}`,
     });
-    const url = `${this.config.DiscordBaseUrl}/api/v9/channels/${this.config.ChannelId}/application-commands/search?${searchParams}`;
-    const response = await this.config.fetch(url, {
-      headers: { authorization: this.config.SalaiToken },
-    });
-    const data = await response.json();
-    if ("application_commands" in data) {
-      const application_commands = data.application_commands;
+    if(!this.application_commands_res){
+      const url = `${this.config.DiscordBaseUrl}/api/v9/channels/${this.config.ChannelId}/application-command-index`;
+      const response = await this.config.fetch(url, {
+        headers: { authorization: this.config.SalaiToken },
+      });
+      const data = await response.json();
+      // console.log('data getCommand',data)
+      this.application_commands_res=data
+    }
+    // const url = `${this.config.DiscordBaseUrl}/api/v9/channels/${this.config.ChannelId}/application-commands/search?${searchParams}`;
+    if ("application_commands" in this.application_commands_res) {
+      const application_commands = this.application_commands_res.application_commands;
       let filterArr=application_commands.filter((item:any)=>item.name===name);
+      // console.log('filterArr',filterArr)
       if (filterArr[0]) {
           // console.log(
           //   `got ${name} application_commands`,
@@ -92,11 +99,12 @@ export class Command {
           return filterArr[0]
       }
       if(application_commands[0]){
+      // console.log('application_commands[0]',application_commands[0])
         return application_commands[0]
       }
     }
     console.log(`Failed to get application_commands for command ${name}`,this.config.ChannelId);
-    return data;
+    return this.application_commands_res;
   }
   async imaginePayload(prompt: string, nonce?: string) {
     const data = await this.commandData("imagine", [
