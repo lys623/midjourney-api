@@ -82,7 +82,12 @@ export class Command {
       const response = await this.config.fetch(url, {
         headers: { authorization: this.config.SalaiToken },
       });
-      const data = await response.json();
+      let data={}
+      try{
+           data = await response.json();
+      }catch(e){
+          console.log('application-command-index error',response,searchParams)
+      }
       // console.log('data getCommand',data)
       this.application_commands_res=data
     }
