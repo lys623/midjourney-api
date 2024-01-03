@@ -86,7 +86,7 @@ export class Command {
       try{
            data = await response.json();
       }catch(e){
-          console.log('application-command-index error',response,searchParams)
+          console.log('application-command-index error',response,this.config.ChannelId)
       }
       // console.log('data getCommand',data)
       this.application_commands_res=data
