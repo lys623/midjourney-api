@@ -82,6 +82,7 @@ export class MidjourneyApi extends Command {
         console.error("api.error.config", {
           payload: JSON.stringify(payload),
           config: this.config,
+
         });
       }
       return response.status;
@@ -143,6 +144,10 @@ export class MidjourneyApi extends Command {
 
   async SwitchRemixApi(nonce: string = nextNonce()) {
     const payload = await this.PreferPayload(nonce);
+    return this.safeIteractions(payload);
+  }
+  async setPreferSuffix(nonce: string = nextNonce(),value:string){
+    const payload = await this.PreferSuffix(nonce,value);
     return this.safeIteractions(payload);
   }
 

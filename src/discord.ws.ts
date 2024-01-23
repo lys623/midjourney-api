@@ -33,6 +33,7 @@ export class WsMessage {
   private skipMessageId: string[] = [];
   private reconnectTime: boolean[] = [];
   private heartbeatInterval = 0;
+  private hasReadyInit = false; 
   public UserId = "";
   constructor(public config: MJConfig, public MJApi: MidjourneyApi) {
     this.ws = new this.config.WebSocket(this.config.WsBaseUrl);
@@ -76,9 +77,11 @@ export class WsMessage {
   }
 
   async onceReady() {
+    const that=this;
     return new Promise((resolve) => {
       this.once("ready", (user) => {
         //print user nickname
+        that.hasReadyInit=true;
         console.log(`🎊 ws ready!!! Hi: ${user.global_name||user.email}`);
         resolve(this);
       });
@@ -86,8 +89,10 @@ export class WsMessage {
   }
   //try reconnect
   reconnect() {
-    return;
-    if (this.closed) return;
+    if(!this.hasReadyInit){
+      return;
+    }
+   console.log('-------- reconnect2',this.config?.ChannelId)
     this.ws = new this.config.WebSocket(this.config.WsBaseUrl);
     this.heartbeatInterval = 0;
     this.ws.addEventListener("open", this.open.bind(this));
@@ -234,6 +239,11 @@ export class WsMessage {
             this.emit("prefer-remix", content);
           }
           break;
+       case 'prefer suffix':
+        if (content != "") {
+          this.emit("prefer-suffix", content);
+        }
+       break;
         case "shorten":
           const shorten: MJShorten = {
             description: embeds?.[0]?.description,

@@ -78,7 +78,10 @@ export class Command {
       // command_ids: `${this.config.BotId}`,
     });
     if(!this.application_commands_res){
-      const url = `${this.config.DiscordBaseUrl}/api/v9/channels/${this.config.ChannelId}/application-command-index`;
+      let url = `${this.config.DiscordBaseUrl}/api/v9/channels/${this.config.ChannelId}/application-command-index`;
+      if(this.config.ServerId){
+        url=`${this.config.DiscordBaseUrl}/api/v9/guilds/${this.config.ServerId}/application-command-index`;
+      }
       const response = await this.config.fetch(url, {
         headers: { authorization: this.config.SalaiToken },
       });
@@ -131,6 +134,23 @@ export class Command {
         type: 1,
         name: "remix",
         options: [],
+      },
+    ]);
+    return this.data2Paylod(data, nonce);
+  }
+
+  async PreferSuffix(nonce?: string,value?:string) {
+    const data = await this.commandData("prefer", [
+      {
+        type: 1,
+        name: "suffix",
+          "options": [
+              {
+                  "type": 3,
+                  "name": "new_value",
+                  "value": value
+              }
+          ]
       },
     ]);
     return this.data2Paylod(data, nonce);

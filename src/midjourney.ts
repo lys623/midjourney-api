@@ -214,6 +214,15 @@ export class Midjourney extends MidjourneyMessage {
     }
     return wsClient.waitContent("prefer-remix");
   }
+  async SetSuffix(value:string) {
+    const wsClient = await this.getWsClient();
+    const nonce = nextNonce();
+    const httpStatus = await this.MJApi.setPreferSuffix(nonce,value);
+    if (httpStatus !== 204) {
+      throw new Error(`------ RelaxApi failed with status ${httpStatus}`);
+    }
+    return wsClient.waitContent("prefer-suffix");
+  }
   async Describe(imgUri: string) {
     const wsClient = await this.getWsClient();
     const nonce = nextNonce();
