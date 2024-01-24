@@ -92,6 +92,7 @@ export class WsMessage {
     if(!this.hasReadyInit){
       return;
     }
+    this.hasReadyInit=false;
    console.log('-------- reconnect2',this.config?.ChannelId)
     this.ws = new this.config.WebSocket(this.config.WsBaseUrl);
     this.heartbeatInterval = 0;

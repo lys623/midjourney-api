@@ -125,7 +125,7 @@ export const content2prompt = (content: string) => {
   if (matches && matches.length > 1) {
     return matches[1]; // Get the matched content
   } else {
-    console.log("No match found.", content);
+    // console.log("No match found.", content);
     return content;
   }
 };
