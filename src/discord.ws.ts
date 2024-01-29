@@ -34,6 +34,8 @@ export class WsMessage {
   private reconnectTime: boolean[] = [];
   private heartbeatInterval = 0;
   private hasReadyInit = false; 
+  private hasReadyInitRetryInt:any; 
+  private hasReadyInitRetryCount=0; 
   public UserId = "";
   constructor(public config: MJConfig, public MJApi: MidjourneyApi) {
     this.ws = new this.config.WebSocket(this.config.WsBaseUrl);
@@ -89,10 +91,24 @@ export class WsMessage {
   }
   //try reconnect
   reconnect() {
+    const that=this;
     if(!this.hasReadyInit){
       return;
     }
     this.hasReadyInit=false;
+    clearInterval(this.hasReadyInitRetryInt)
+    this.hasReadyInitRetryInt=setInterval(async ()=>{
+      that.hasReadyInit=true;
+      console.log('reconnect setInterval',that.config?.ChannelId, that.hasReadyInitRetryCount)
+      if(that.ws.readyState !== that.ws.OPEN&&that.hasReadyInitRetryCount<3){
+        that.hasReadyInitRetryCount++
+        that.reconnect();
+        await that.onceReady();
+      }else{
+        clearInterval(that.hasReadyInitRetryInt)
+        that.hasReadyInitRetryCount=0;
+      }
+    },30*1000)
    console.log('-------- reconnect2',this.config?.ChannelId)
     this.ws = new this.config.WebSocket(this.config.WsBaseUrl);
     this.heartbeatInterval = 0;
