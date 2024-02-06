@@ -89,6 +89,7 @@ export class Command {
       try{
            data = await response.json();
       }catch(e){
+        // TODO:set block
           console.log('application-command-index error',response,this.config.ChannelId)
       }
       // console.log('data getCommand',data)
@@ -186,10 +187,15 @@ export class Command {
     const data = await this.commandData(
       "describe",
       [
+        // {
+        //   type: 11,
+        //   name: "image",
+        //   value: image.id
+        // },
         {
-          type: 11,
-          name: "image",
-          value: image.id,
+          type: 3,
+          name: "link",
+          value: image.imgUri
         },
       ],
       [

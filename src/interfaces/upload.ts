@@ -12,4 +12,5 @@ export type DiscordImage = {
   id: number | string;
   filename: string;
   upload_filename: string;
+  imgUri?:string
 };

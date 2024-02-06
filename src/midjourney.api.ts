@@ -499,6 +499,7 @@ export class MidjourneyApi extends Command {
 
   async DescribeApi(image: DiscordImage, nonce?: string) {
     const payload = await this.describePayload(image, nonce);
+    // console.log('payload DescribeApi',JSON.stringify(payload))
     return this.safeIteractions(payload);
   }
   async upImageApi(image: DiscordImage, nonce?: string) {

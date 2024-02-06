@@ -227,6 +227,7 @@ export class Midjourney extends MidjourneyMessage {
     const wsClient = await this.getWsClient();
     const nonce = nextNonce();
     const DcImage = await this.MJApi.UploadImageByUri(imgUri);
+    DcImage.imgUri=imgUri;
     this.log(`Describe`, DcImage);
     const httpStatus = await this.MJApi.DescribeApi(DcImage, nonce);
     if (httpStatus !== 204) {
@@ -361,6 +362,7 @@ export class Midjourney extends MidjourneyMessage {
             case 'inpaint':
               return newNonce;  
             case "variation":
+              // console.log('this.config.Remix',this.config.Remix)
               // if (this.config.Remix !== true) {
               //   return "";
               // }
@@ -378,6 +380,7 @@ export class Midjourney extends MidjourneyMessage {
               }
               return newNonce;
             default:
+              console.log(`unknown customId ${customId}`)
               return "";
               throw new Error(`unknown customId ${customId}`);
           }
