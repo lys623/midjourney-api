@@ -199,11 +199,11 @@ export class Command {
         },
       ],
       [
-        {
-          id: <string>image.id,
-          filename: image.filename,
-          uploaded_filename: image.upload_filename,
-        },
+        // {
+        //   id: <string>image.id,
+        //   filename: image.filename,
+        //   uploaded_filename: image.upload_filename,
+        // },
       ]
     );
     return this.data2Paylod(data, nonce);
