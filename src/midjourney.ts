@@ -81,7 +81,7 @@ export class Midjourney extends MidjourneyMessage {
     if (httpStatus !== 204) {
         console.log(new Error(`ImagineApi failed with status ${httpStatus}`));
 ·        return new Promise((resolve,reject)=>{
-          reject('status '+httpStatus)
+          reject('imagine status '+httpStatus)
         })
     }
     if (this.wsClient) {
