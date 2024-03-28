@@ -79,7 +79,10 @@ export class Midjourney extends MidjourneyMessage {
     this.log(`Imagine`, prompt, "nonce", nonce);
     const httpStatus = await this.MJApi.ImagineApi(prompt, nonce);
     if (httpStatus !== 204) {
-      throw new Error(`ImagineApi failed with status ${httpStatus}`);
+        console.log(new Error(`ImagineApi failed with status ${httpStatus}`));
+·        return new Promise((resolve,reject)=>{
+          reject('status '+httpStatus)
+        })
     }
     if (this.wsClient) {
       return await this.wsClient.waitImageMessage({ nonce, loading, prompt });
