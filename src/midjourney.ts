@@ -80,8 +80,8 @@ export class Midjourney extends MidjourneyMessage {
     const httpStatus = await this.MJApi.ImagineApi(prompt, nonce);
     if (httpStatus !== 204) {
         console.log(new Error(`ImagineApi failed with status ${httpStatus}`));
-·        return new Promise((resolve,reject)=>{
-          reject('imagine status '+httpStatus)
+       return new Promise((resolve,reject)=>{
+          reject(`ImagineApi status ${httpStatus}`);
         })
     }
     if (this.wsClient) {
