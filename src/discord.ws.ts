@@ -24,6 +24,8 @@ import {
 } from "./utils";
 import { VerifyHuman } from "./verify.human";
 import WebSocket from "isomorphic-ws";
+import * as fs from "fs";
+import * as path from "path";
 export class WsMessage {
   ws: WebSocket;
   private closed = false;
@@ -163,7 +165,7 @@ export class WsMessage {
       this.updateMjEventIdByNonce(id, nonce);
       if (embeds?.[0]) {
         const { color, description, title } = embeds[0];
-        this.log("embeds[0].color", color);
+        this.log("embeds[0].color", color, title);
         switch (color) {
           case 16711680: //error
             if (title == "Action needed to continue") {
@@ -200,7 +202,7 @@ export class WsMessage {
       }
     }
 
-    if (!nonce && attachments?.length > 0 && components?.length > 0) {
+    if (attachments?.length > 0 && components?.length > 0) {
       this.done(message);
       return;
     }
@@ -313,8 +315,8 @@ export class WsMessage {
   }
   private async onMessageCreate(message: any) {
     const { channel_id, author, interaction } = message;
-    if (channel_id !== this.config.ChannelId) return;
-    if (author?.id !== this.config.BotId) return;
+    // if (channel_id !== this.config.ChannelId) return;
+    // if (author?.id !== this.config.BotId) return;
     // if (interaction && interaction.user.id !== this.UserId) return;
     // this.log("[messageCreate]", JSON.stringify(message));
     this.messageCreate(message);
@@ -346,9 +348,10 @@ export class WsMessage {
     }
     const message = msg.d;
     if (message.channel_id === this.config.ChannelId) {
-      this.log(data);
+      // this.log(data);
     }
-    this.log("new msg:------\n", msg.t);
+    // this.log("new msg:------\n", msg.t,data);
+    this.config.Debug&&this.log("new msg:------", msg.t, JSON.stringify(message));
     // console.log(data);
     switch (msg.t) {
       case "READY":
@@ -505,13 +508,15 @@ export class WsMessage {
 
   private async filterMessages(MJmsg: MJMessage) {
     // delay 300ms for discord message delete
-    await this.timeout(300);
-    const event = this.getEventByContent(MJmsg.content);
     const eventMsg: MJEmit = {
       message: MJmsg,
     };
+    this.emitImage('createDone', eventMsg);
+    await this.timeout(300);
+    const event = this.getEventByContent(MJmsg.content);
+   
     if (!event) {
-      this.log("FilterMessages not found.", MJmsg.content);
+      // this.log("FilterMessages not found.", MJmsg.content);
       this.emitImage('notFoundCallback', eventMsg);
       return;
     }
@@ -560,6 +565,26 @@ export class WsMessage {
 
   protected async log(...args: any[]) {
     this.config.Debug && console.info(...args, new Date().toISOString());
+    
+    // Write logs to file
+    if(!this.config.writeLog){
+      return;
+    }
+    try {
+      const logDir = path.join(process.cwd(), 'logs');
+      if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true });
+      }
+      
+      const logFile = path.join(logDir, 'discord-ws.log');
+      const timestamp = new Date().toISOString();
+      const logMessage = `${timestamp} - ${args.map(arg => 
+        typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ')}\n`;
+      
+      fs.appendFileSync(logFile, logMessage);
+    } catch (error) {
+      console.error('Failed to write to log file:', error);
+    }
   }
 
   emit(event: string, data: any) {

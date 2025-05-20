@@ -10,6 +10,7 @@ export interface MJConfig {
   SalaiToken: string;
   BotId: typeof MJBot | typeof NijiBot |typeof SdBotId
   Debug: boolean;
+  writeLog?: boolean;
   Limit: number;
   MaxWait: number;
   SessionId: string;
