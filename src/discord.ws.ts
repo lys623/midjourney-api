@@ -751,7 +751,7 @@ export class WsMessage {
           resolve(message);
           return;
         }
-        message && loading && loading(message.uri, message.progress || "");
+        message && loading && loading(message.uri, message.progress || "", message);
       };
       this.waitMjEvents.set(nonce, {
         nonce,

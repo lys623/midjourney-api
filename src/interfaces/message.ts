@@ -14,7 +14,7 @@ export interface MJMessage {
   originMessage?:any
 }
 
-export type LoadingHandler = (uri: string, progress: string) => void;
+export type LoadingHandler = (uri: string, progress: string, message?: MJMessage) => void;
 export type OnModal = (nonce: string, id: string,opts?:any) => Promise<string>;
 
 export interface WaitMjEvent {

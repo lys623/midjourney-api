@@ -9,8 +9,10 @@ import { sleep } from "../src/utils";
  * ```
  */
 let client1,client2;
-const token='MTM3MzE3ODAzODYxNTAxOTUyMA.G4Mw4k.-uZ3l_sgjMofIKex7epSfdGH5EHNb4N-23eNqA'
-const channelId='1374074820345593916'
+const token='MTM3Mzk2ODIzNzgyOTU1NDIyOA.GaiRiw.BWJqKfTE8CPRKZ59ayTiyKNMniNrCTqcNbZWIM'
+// const token='MTM3Mjc4NTMxMzg4MTAwMjAwNQ.GGJIgn.rY4O4yOLk4DsPd1qecSHcXNmv11Wsn6jxEJs8k'
+// const channelId='1373309591604953211'
+const channelId='1374491928883892465'
 async function main() {
   console.log('process.env.SERVER_ID',process.env.SERVER_ID)
   const client = new Midjourney({
@@ -18,45 +20,30 @@ async function main() {
     // ServerId: <string>process.env.SERVER_ID,
     ChannelId: channelId,
     SalaiToken: token,
-    Debug: true,
+    // Debug: true,
     Ws: true,
-    writeLog:true
+    // writeLog:true
   });
 
   await client.Connect();
   await sleep(5000);
   console.log('------setting------')
   client.wsClient.on('createDone',async (data)=>{
-    console.log('createDone---',data)
+    // console.log('success Done---',JSON.stringify(data))
   })
   client.wsClient.on('messageCreate',async (data)=>{
     const text=data.embeds?.[0]?.footer?.text;
     const title=data.embeds?.[0]?.title;
+    const color=data.embeds?.[0]?.color;
+    const errorMsg=data.embeds?.[0]?.description;
     if(title?.includes('have permission')){
       return;
     }
-    const banText=['year old','岁','year-old','years-old','years old']
-    let shouldBan=false;
-    // if(hasConsecutiveDigits(text)){
-    //   shouldBan=true;
-    // }
-    if(text&&banText.some(item=>text?.includes(item))){
-      shouldBan=true;
+    if(color===16711680){
+      console.log('----创建失败-',title, errorMsg,JSON.stringify(data))
+      return;
     }
-    if(shouldBan){
-      console.log('banText',text)
-      const authorizing_integration_owners=data.interaction_metadata?.authorizing_integration_owners;
-      Object.values(authorizing_integration_owners).forEach(val=>{
-        const application_id=data.application_id;
-        console.log('authorizing_integration_owners--',val,application_id,data.channel_id)
-        console.log('discord link:',`https://discord.com/channels/${val}/${data.channel_id}`)
-        if(val==0){
-          deleteChannel(data.channel_id);
-        }else{
-          setBan(val,application_id);
-        }
-      })
-    }
+    console.log('----new create',JSON.stringify(data))
   })
   // const setting = await client.Settings();
   // console.log('------setting',setting);
@@ -191,6 +178,7 @@ function hasConsecutiveDigits(str) {
 }
 
 function hideTask(channelId,messageId){
+  console.log('---1-1-1-1-')
   fetch(`https://discord.com/api/v9/channels/${channelId}/messages/${messageId}/reactions/%E2%9D%8C/%40me?location=Message%20Context%20Menu&type=0`, {
     "headers": {
       "accept": "*/*",
@@ -213,7 +201,7 @@ function hideTask(channelId,messageId){
     "method": "PUT"
   }).then(async (res)=>{
     console.log('delete task---res',res)
+  }).catch((res)=>{
+    console.log('delete task---r222es',res)
   })
 }
-
-// hideTask('1374277327600615488','1374299809288163328')
